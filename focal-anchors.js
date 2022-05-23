@@ -1,12 +1,18 @@
 const focalAnchors = {}
 
-focalAnchors.attrName = 'has-focal-anchors'
-// this attribute marks containers that already have anchors assigned
-// containers with the attribute have the anchors removed rather than readded
+focalAnchors.attrNameContainer = 'focal-anchors-has'
+// this attribute marks elements that already have anchors assigned
+// elements with the attribute have the anchors removed rather than readded
+
+focalAnchors.attrNameHighlight = 'focal-anchor-is'
+// this attribute marks the anchor tags themselves
+// elements with the attribute are removed and merged when clearing anchors
+
+focalAnchors.classNameHighlight = 'focal-anchor'
 
 focalAnchors.toggleAnchors = function (id) { // eslint-disable-line
   const container = document.getElementById(id)
-  if (container.hasAttribute(focalAnchors.attrName)) {
+  if (container.hasAttribute(focalAnchors.attrNameContainer)) {
     focalAnchors.clearAnchors(container)
   } else {
     focalAnchors.addAnchorsToContainer(container)
@@ -15,8 +21,38 @@ focalAnchors.toggleAnchors = function (id) { // eslint-disable-line
 
 // clear all anchors inside a container
 focalAnchors.clearAnchors = function (container) {
-  container.innerHTML = container.innerHTML.replaceAll('<b>', '')
-  focalAnchors.clearElementByRef(container)
+  const stack = [container]
+  while (stack.length > 0) {
+    const topElement = stack.pop()
+    focalAnchors.unmarkElement(topElement)
+    Array.from(topElement.childNodes).forEach(node => {
+      if (node.nodeType !== Node.TEXT_NODE) { // eslint-disable-line
+        if (node.hasAttribute(focalAnchors.attrNameContainer)) {
+          stack.push(node)
+        }
+        if (node.hasAttribute(focalAnchors.attrNameHighlight)) {
+          const prev = node.previousSibling
+          const next = node.nextSibling
+          if (prev !== null && prev.nodeType === Node.TEXT_NODE) { // eslint-disable-line
+            // merge with previous node
+            prev.textContent += node.textContent
+            if (next.nodeType === Node.TEXT_NODE) { // eslint-disable-line
+              // merge with next node
+              prev.textContent += next.textContent
+              node.parentNode.removeChild(next)
+            }
+          } else if (next !== null && next.nodeType === Node.TEXT_NODE) { // eslint-disable-line
+            // merge with next node (not sure this will ever run)
+            next.textContent += node.textContent
+          } else {
+            // if there are no adjacent text nodes, just insert
+            node.parentNode.insertBefore(document.createTextNode(node.textContent), node)
+          }
+          node.parentNode.removeChild(node)
+        }
+      }
+    })
+  }
 }
 
 // add anchors to children of container, recursively
@@ -26,11 +62,11 @@ focalAnchors.addAnchorsToContainer = function (container) {
     const topElement = stack.pop()
     Array.from(topElement.childNodes).forEach(node => {
       if (node.nodeType === Node.TEXT_NODE) { // eslint-disable-line
-        focalAnchors.markElementByRef(node.parentNode)
+        focalAnchors.markElement(node.parentNode)
         focalAnchors.injectAnchorText(node)
         node.parentNode.removeChild(node)
       } else {
-        if (!node.hasAttribute(focalAnchors.attrName)) {
+        if (!node.hasAttribute(focalAnchors.attrNameHighlight)) {
           stack.push(node)
         }
       }
@@ -46,7 +82,7 @@ focalAnchors.injectAnchorText = function (node) {
     const length = word.replaceAll(/\W/g, '').length
     const boldNum = Math.min(Math.ceil(length / 2), 2)
     if (length > 0) {
-      word = '<b>' + word.substring(0, boldNum) + '</b>' + word.substring(boldNum)
+      word = '<b class="' + focalAnchors.classNameHighlight + '" ' + focalAnchors.attrNameHighlight + '>' + word.substring(0, boldNum) + '</b>' + word.substring(boldNum)
     } else {
       word = ''
     }
@@ -54,26 +90,19 @@ focalAnchors.injectAnchorText = function (node) {
   }
 
   // workaround to parse HTML lazily
-  const dummy = document.createElement('div')
+  const dummy = document.createElement('span')
   dummy.innerHTML = words.join(' ')
   const nodes = Array.from(dummy.childNodes)
   nodes.forEach(dummyNode => {
     node.parentNode.insertBefore(dummyNode, node)
   })
+  dummy.remove()
 }
 
-focalAnchors.markElementById = function (id) {
-  document.getElementById(id).setAttribute(focalAnchors.attrName, '')
+focalAnchors.markElement = function (element) {
+  element.setAttribute(focalAnchors.attrNameContainer, '')
 }
 
-focalAnchors.markElementByRef = function (element) {
-  element.setAttribute(focalAnchors.attrName, '')
-}
-
-focalAnchors.clearElementById = function (id) {
-  document.getElementById(id).removeAttribute(focalAnchors.attrName)
-}
-
-focalAnchors.clearElementByRef = function (element) {
-  element.removeAttribute(focalAnchors.attrName)
+focalAnchors.unmarkElement = function (element) {
+  element.removeAttribute(focalAnchors.attrNameContainer)
 }
