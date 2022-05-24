@@ -69,7 +69,7 @@ focalAnchors.addAnchorsToContainer = function (container) {
         focalAnchors.injectAnchorText(node)
         node.parentNode.removeChild(node)
       } else {
-        if (!node.hasAttribute(focalAnchors.attrNameHighlight)) {
+        if (!node.hasAttribute(focalAnchors.attrNameContainer)) {
           stack.push(node)
         }
       }
