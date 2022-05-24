@@ -100,7 +100,6 @@ focalAnchors.injectAnchorText = function (node) {
 }
 
 focalAnchors.setConfig = function (key, value) {
-  console.log(key)
   focalAnchors.config[key] = value
 }
 
