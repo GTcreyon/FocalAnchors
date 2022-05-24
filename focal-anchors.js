@@ -9,6 +9,7 @@ focalAnchors.attrNameHighlight = 'focal-anchor-is'
 // elements with the attribute are removed and merged when clearing anchors
 
 focalAnchors.classNameHighlight = 'focal-anchor'
+// this class is used on focal anchor tags to give them css styling
 
 focalAnchors.toggleAnchors = function (id) { // eslint-disable-line
   const container = document.getElementById(id)
@@ -24,7 +25,7 @@ focalAnchors.clearAnchors = function (container) {
   const stack = [container]
   while (stack.length > 0) {
     const topElement = stack.pop()
-    focalAnchors.unmarkElement(topElement)
+    topElement.removeAttribute(focalAnchors.attrNameContainer)
     Array.from(topElement.childNodes).forEach(node => {
       if (node.nodeType !== Node.TEXT_NODE) { // eslint-disable-line
         if (node.hasAttribute(focalAnchors.attrNameContainer)) {
@@ -42,8 +43,7 @@ focalAnchors.clearAnchors = function (container) {
               node.parentNode.removeChild(next)
             }
           } else if (next !== null && next.nodeType === Node.TEXT_NODE) { // eslint-disable-line
-            // merge with next node (not sure this will ever run)
-            next.textContent += node.textContent
+            next.textContent = node.textContent + next.textContent
           } else {
             // if there are no adjacent text nodes, just insert
             node.parentNode.insertBefore(document.createTextNode(node.textContent), node)
@@ -62,7 +62,7 @@ focalAnchors.addAnchorsToContainer = function (container) {
     const topElement = stack.pop()
     Array.from(topElement.childNodes).forEach(node => {
       if (node.nodeType === Node.TEXT_NODE) { // eslint-disable-line
-        focalAnchors.markElement(node.parentNode)
+        node.parentNode.setAttribute(focalAnchors.attrNameContainer, '')
         focalAnchors.injectAnchorText(node)
         node.parentNode.removeChild(node)
       } else {
@@ -78,31 +78,16 @@ focalAnchors.addAnchorsToContainer = function (container) {
 focalAnchors.injectAnchorText = function (node) {
   const words = node.textContent.split(' ')
   for (let wordID = 0; wordID < words.length; wordID++) {
-    let word = words[wordID]
+    const word = words[wordID]
     const length = word.replaceAll(/\W/g, '').length
     const boldNum = Math.min(Math.ceil(length / 2), 2)
     if (length > 0) {
-      word = '<b class="' + focalAnchors.classNameHighlight + '" ' + focalAnchors.attrNameHighlight + '>' + word.substring(0, boldNum) + '</b>' + word.substring(boldNum)
-    } else {
-      word = ''
+      const bold = document.createElement('b')
+      bold.setAttribute('class', focalAnchors.classNameHighlight)
+      bold.setAttribute(focalAnchors.attrNameHighlight, '')
+      bold.textContent = word.substring(0, boldNum)
+      node.parentNode.insertBefore(bold, node)
+      node.parentNode.insertBefore(document.createTextNode(word.substring(boldNum) + ' '), node)
     }
-    words[wordID] = word
   }
-
-  // workaround to parse HTML lazily
-  const dummy = document.createElement('span')
-  dummy.innerHTML = words.join(' ')
-  const nodes = Array.from(dummy.childNodes)
-  nodes.forEach(dummyNode => {
-    node.parentNode.insertBefore(dummyNode, node)
-  })
-  dummy.remove()
-}
-
-focalAnchors.markElement = function (element) {
-  element.setAttribute(focalAnchors.attrNameContainer, '')
-}
-
-focalAnchors.unmarkElement = function (element) {
-  element.removeAttribute(focalAnchors.attrNameContainer)
 }
