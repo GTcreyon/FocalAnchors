@@ -1,7 +1,12 @@
 const focalAnchors = {}
 focalAnchors.config = {
   anchorMaxLength: 2, // max length of an anchor
-  anchorProportion: 0.5 // proportion of the word that an anchor takes up
+  anchorProportion: 0.5, // proportion of the word that an anchor takes up
+  locale: 'en'
+}
+
+focalAnchors.minorWords = {
+  en: ['a', 'an', 'the', 'and', 'as', 'but', 'for', 'if', 'nor', 'or', 'so', 'yet', 'at', 'by', 'for', 'in', 'of', 'to']
 }
 
 focalAnchors.attrNameContainer = 'focal-anchors-has'
@@ -87,14 +92,18 @@ focalAnchors.injectAnchorText = function (node) {
   for (let wordID = 0; wordID < words.length; wordID++) {
     const word = words[wordID]
     const length = word.replaceAll(/\W/g, '').length
-    const boldNum = Math.min(Math.ceil(length * focalAnchors.config.anchorProportion), focalAnchors.config.anchorMaxLength)
     if (length > 0) {
-      const bold = document.createElement('b')
-      bold.setAttribute('class', focalAnchors.classNameHighlight)
-      bold.setAttribute(focalAnchors.attrNameHighlight, '')
-      bold.textContent = word.substring(0, boldNum)
-      node.parentNode.insertBefore(bold, node)
-      node.parentNode.insertBefore(document.createTextNode(word.substring(boldNum) + ' '), node)
+      if (focalAnchors.minorWords[focalAnchors.config.locale].includes(word)) {
+        node.parentNode.insertBefore(document.createTextNode(word + ' '), node)
+      } else {
+        const boldNum = Math.min(Math.ceil(length * focalAnchors.config.anchorProportion), focalAnchors.config.anchorMaxLength)
+        const bold = document.createElement('b')
+        bold.setAttribute('class', focalAnchors.classNameHighlight)
+        bold.setAttribute(focalAnchors.attrNameHighlight, '')
+        bold.textContent = word.substring(0, boldNum)
+        node.parentNode.insertBefore(bold, node)
+        node.parentNode.insertBefore(document.createTextNode(word.substring(boldNum) + ' '), node)
+      }
     }
   }
 }
