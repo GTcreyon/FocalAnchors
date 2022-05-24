@@ -1,4 +1,8 @@
 const focalAnchors = {}
+focalAnchors.config = {
+  anchorMaxLength: 2, // max length of an anchor
+  anchorProportion: 0.5 // proportion of the word that an anchor takes up
+}
 
 focalAnchors.attrNameContainer = 'focal-anchors-has'
 // this attribute marks elements that already have anchors assigned
@@ -83,7 +87,7 @@ focalAnchors.injectAnchorText = function (node) {
   for (let wordID = 0; wordID < words.length; wordID++) {
     const word = words[wordID]
     const length = word.replaceAll(/\W/g, '').length
-    const boldNum = Math.min(Math.ceil(length / 2), 2)
+    const boldNum = Math.min(Math.ceil(length * focalAnchors.config.anchorProportion), focalAnchors.config.anchorMaxLength)
     if (length > 0) {
       const bold = document.createElement('b')
       bold.setAttribute('class', focalAnchors.classNameHighlight)
@@ -93,4 +97,13 @@ focalAnchors.injectAnchorText = function (node) {
       node.parentNode.insertBefore(document.createTextNode(word.substring(boldNum) + ' '), node)
     }
   }
+}
+
+focalAnchors.setConfig = function (key, value) {
+  console.log(key)
+  focalAnchors.config[key] = value
+}
+
+focalAnchors.getConfig = function (key, value) {
+  return focalAnchors.config[key]
 }
