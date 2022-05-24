@@ -11,8 +11,11 @@ focalAnchors.attrNameHighlight = 'focal-anchor-is'
 focalAnchors.classNameHighlight = 'focal-anchor'
 // this class is used on focal anchor tags to give them css styling
 
-focalAnchors.toggleAnchors = function (id) { // eslint-disable-line
-  const container = document.getElementById(id)
+focalAnchors.toggleAnchorsById = function (id) { // eslint-disable-line
+  focalAnchors.toggleAnchorsByRef(document.getElementById(id))
+}
+
+focalAnchors.toggleAnchorsByRef = function (container) { // eslint-disable-line
   if (container.hasAttribute(focalAnchors.attrNameContainer)) {
     focalAnchors.clearAnchors(container)
   } else {
