@@ -11,7 +11,7 @@ focalAnchors.attrNameHighlight = 'focal-anchor-is'
 focalAnchors.classNameHighlight = 'focal-anchor'
 // This class is used on focal anchor tags to give them css styling.
 
-focalAnchors.toggleAnchorsById = function (id) { // eslint-disable-line
+focalAnchors.toggleAnchorsById = function (id) {
   focalAnchors.toggleAnchorsByRef(document.getElementById(id))
 }
 
@@ -25,27 +25,27 @@ focalAnchors.toggleAnchorsByRef = function (container) {
 
 // Clear all anchors inside a container.
 focalAnchors.clearAnchors = function (container) {
-  const Stack = [container]
+  const stack = [container]
   while (stack.length > 0) {
     const topElement = stack.pop()
     topElement.removeAttribute(focalAnchors.attrNameContainer)
     Array.from(topElement.childNodes).forEach(node => {
-      if (node.nodeType !== Node.TEXT_NODE) { // eslint-disable-line
+      if (node.nodeType !== Node.TEXT_NODE) {
         if (node.hasAttribute(focalAnchors.attrNameContainer)) {
           stack.push(node)
         }
         if (node.hasAttribute(focalAnchors.attrNameHighlight)) {
           const prev = node.previousSibling
           const next = node.nextSibling
-          if (prev !== null && prev.nodeType === Node.TEXT_NODE) { // eslint-disable-line
+          if (prev !== null && prev.nodeType === Node.TEXT_NODE) {
             // Merge with previous node.
             prev.textContent += node.textContent
-            if (next.nodeType === Node.TEXT_NODE) { // eslint-disable-line
+            if (next.nodeType === Node.TEXT_NODE) {
               // Merge with next node.
               prev.textContent += next.textContent
               node.parentNode.removeChild(next)
             }
-          } else if (next !== null && next.nodeType === Node.TEXT_NODE) { // eslint-disable-line
+          } else if (next !== null && next.nodeType === Node.TEXT_NODE) {
             next.textContent = node.textContent + next.textContent
           } else {
             // If there are no adjacent text nodes, just insert.
@@ -64,7 +64,7 @@ focalAnchors.addAnchorsToContainer = function (container) {
   while (stack.length > 0) {
     const topElement = stack.pop()
     Array.from(topElement.childNodes).forEach(node => {
-      if (node.nodeType === Node.TEXT_NODE) { // eslint-disable-line
+      if (node.nodeType === Node.TEXT_NODE) {
         node.parentNode.setAttribute(focalAnchors.attrNameContainer, '')
         focalAnchors.injectAnchorText(node)
         node.parentNode.removeChild(node)
