@@ -1,21 +1,21 @@
 const focalAnchors = {}
 
 focalAnchors.attrNameContainer = 'focal-anchors-has'
-// this attribute marks elements that already have anchors assigned
-// elements with the attribute have the anchors removed rather than readded
+// This attribute marks elements that already have anchors assigned.
+// Elements with the attribute have the anchors removed rather than readded.
 
 focalAnchors.attrNameHighlight = 'focal-anchor-is'
-// this attribute marks the anchor tags themselves
-// elements with the attribute are removed and merged when clearing anchors
+// This attribute marks the anchor tags themselves.
+// Elements with the attribute are removed and merged when clearing anchors.
 
 focalAnchors.classNameHighlight = 'focal-anchor'
-// this class is used on focal anchor tags to give them css styling
+// This class is used on focal anchor tags to give them css styling.
 
 focalAnchors.toggleAnchorsById = function (id) { // eslint-disable-line
   focalAnchors.toggleAnchorsByRef(document.getElementById(id))
 }
 
-focalAnchors.toggleAnchorsByRef = function (container) { // eslint-disable-line
+focalAnchors.toggleAnchorsByRef = function (container) {
   if (container.hasAttribute(focalAnchors.attrNameContainer)) {
     focalAnchors.clearAnchors(container)
   } else {
@@ -23,9 +23,9 @@ focalAnchors.toggleAnchorsByRef = function (container) { // eslint-disable-line
   }
 }
 
-// clear all anchors inside a container
+// Clear all anchors inside a container.
 focalAnchors.clearAnchors = function (container) {
-  const stack = [container]
+  const Stack = [container]
   while (stack.length > 0) {
     const topElement = stack.pop()
     topElement.removeAttribute(focalAnchors.attrNameContainer)
@@ -38,17 +38,17 @@ focalAnchors.clearAnchors = function (container) {
           const prev = node.previousSibling
           const next = node.nextSibling
           if (prev !== null && prev.nodeType === Node.TEXT_NODE) { // eslint-disable-line
-            // merge with previous node
+            // Merge with previous node.
             prev.textContent += node.textContent
             if (next.nodeType === Node.TEXT_NODE) { // eslint-disable-line
-              // merge with next node
+              // Merge with next node.
               prev.textContent += next.textContent
               node.parentNode.removeChild(next)
             }
           } else if (next !== null && next.nodeType === Node.TEXT_NODE) { // eslint-disable-line
             next.textContent = node.textContent + next.textContent
           } else {
-            // if there are no adjacent text nodes, just insert
+            // If there are no adjacent text nodes, just insert.
             node.parentNode.insertBefore(document.createTextNode(node.textContent), node)
           }
           node.parentNode.removeChild(node)
@@ -58,7 +58,7 @@ focalAnchors.clearAnchors = function (container) {
   }
 }
 
-// add anchors to children of container, recursively
+// Add anchors to children of container, recursively.
 focalAnchors.addAnchorsToContainer = function (container) {
   const stack = [container]
   while (stack.length > 0) {
@@ -77,7 +77,7 @@ focalAnchors.addAnchorsToContainer = function (container) {
   }
 }
 
-// add anchor points to a text string
+// Add anchor points to a text string.
 focalAnchors.injectAnchorText = function (node) {
   const words = node.textContent.split(' ')
   for (let wordID = 0; wordID < words.length; wordID++) {
